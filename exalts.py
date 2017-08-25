@@ -4,9 +4,12 @@
 import requests 
 import time
 import sys
+import datetime
+chunklogger = 0
 
 print("POE TRADE SNIPER 2000 BOOTING UP")
-time.sleep(1)
+
+'''time.sleep(1)
 print(".")
 time.sleep(1)
 print("..")
@@ -15,19 +18,24 @@ print("...")
 time.sleep(1)
 print("")
 print("")
-print("")
-itam = raw_input("Hello, Eric. Type in the name of the item you are looking for.")
+print("")'''
+
+f = open('ccid', 'r')
+cur_change_id = f.readline()
+f.close()
+
+itam = raw_input("Hello, Eric. Starting at cur_change_id " + cur_change_id + ".\nType in the name of the item you are looking for:\n\n")
 print("Great. Let's check the live data stream for " + itam + "...")
 
 sanity = 0
 
 poeapiurl = "http://api.pathofexile.com/public-stash-tabs/?id="
-cur_change_id = "85467415-89772001-84257940-97507737-90871074"
+# cur_change_id = "85850361-90171930-84636963-97934537-91279768"
 
 r = requests.get(poeapiurl + cur_change_id)
 
-print("This code ran, rat least.")
-print("Status code ok?")
+# print("This code ran, rat least.")
+# print("Status code ok?")
 
 if (r.status_code == requests.codes.ok):
     print("Status code ok!")
@@ -43,28 +51,36 @@ data = r.json()
     # print stash["accountName"]
 
 cur_change_id = data["next_change_id"]
-print ("Pulled first round of data...")
+print ("###: Pulled first round of data...")
 
 while(True):
-    print("######################################## next search...")
     sanity = 0
+    chunklogger +=1 
     r = requests.get(poeapiurl + cur_change_id)
     data = r.json()
     for stash in data["stashes"]:
-        if (sanity > 50000):
+        if (stash["lastCharacterName"] == "SONOFSMASHINGTON" or stash["lastCharacterName"] == "sonofsmashington" or stash["lastCharacterName"] == "SonOfSmashington"):
+            saveloc = open('bingo', 'w')
+            saveloc.write("Stash crawler found my stashes!")
+            saveloc.close()
+            print("!!!!!!! ----------- ______ found my own stash ______ ------------- !!!!!!!!!!!!!")
+        if (sanity > 500000):
             break
         # print (stash["accountName"] + " has added items to their premium stash")
         for item in stash["items"]:
             if (itam in item["name"]):
                 if stash["public"] and "note" in item and item["league"] == "Harbinger":
                     print("-------------------")
-                    print("@" + stash["lastCharacterName"] + " I would like to buy your " + itam + " listed for " + item["note"] + " in " + item["league"])
+                    print("@" + stash["lastCharacterName"] + " I'd like to buy your " + itam + " from your " + stash["stash"] + " stash tab, listed at " + item["note"] + " in " + item["league"] + " league.")
                     print("-------------------")
             # print (item["name"])
             sanity += 1
-            if (sanity > 50000):
-                print ("50,000 items searched and no tabula rosa found")
+            if (sanity > 500000):
+                print ("500,000 items searched and no tabula rosa found")
                 break        
     cur_change_id = data["next_change_id"]
-    print("########################################")
-    time.sleep(6)
+    print("###: Next " + cur_change_id)
+    saveloc = open('ccid', 'w')
+    saveloc.write(cur_change_id)
+    saveloc.close()
+    time.sleep(3)
