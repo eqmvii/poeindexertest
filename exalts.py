@@ -24,9 +24,6 @@ f = open('ccid', 'r')
 cur_change_id = f.readline()
 f.close()
 
-itam = raw_input("Hello, Eric. Starting at cur_change_id " + cur_change_id + ".\nType in the name of the item you are looking for:\n\n")
-print("Great. Let's check the live data stream for " + itam + "...")
-
 sanity = 0
 
 poeapiurl = "http://api.pathofexile.com/public-stash-tabs/?id="
@@ -37,10 +34,14 @@ r = requests.get(poeapiurl + cur_change_id)
 # print("This code ran, rat least.")
 # print("Status code ok?")
 
+itam = raw_input("Hello, Eric. Starting at cur_change_id " + cur_change_id + ".\nType in the name of the item you are looking for:\n\n")
+print("Great. Let's check the live data stream for " + itam + "...")
+
 if (r.status_code == requests.codes.ok):
     print("Status code ok!")
 else:
     print("Status fail!")
+
 
 data = r.json()
 
@@ -60,9 +61,8 @@ while(True):
     data = r.json()
     for stash in data["stashes"]:
         if (stash["lastCharacterName"] == "SONOFSMASHINGTON" or stash["lastCharacterName"] == "sonofsmashington" or stash["lastCharacterName"] == "SonOfSmashington"):
-            saveloc = open('bingo', 'w')
-            saveloc.write("Stash crawler found my stashes!")
-            saveloc.close()
+            with open("bingo", "a") as myfile:
+                myfile.write("\nMy stashes at: " + cur_change_id + " \n")
             print("!!!!!!! ----------- ______ found my own stash ______ ------------- !!!!!!!!!!!!!")
         if (sanity > 500000):
             break
